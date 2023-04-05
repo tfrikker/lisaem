@@ -970,9 +970,13 @@ GLOBAL(int,has_lisa_xl_screenmod,0);
 #define UNKNOWN_OS_RUNNING          100
 
 GLOBAL(int,running_lisa_os,LISA_ROM_RUNNING);
+GLOBAL(int,running_lisa_os_version,'H');
+GLOBAL(int,running_lisa_os_boot_device,0);  // 0=in rom, 1=floppy, 2=hard drive - can be used to detect installer
+
 int check_running_lisa_os(void);
 GLOBAL(int,mouse_x_tolerance,0);
 GLOBAL(int,mouse_y_tolerance,0);
+
 
 GLOBAL(int,mouse_x_halfing_tolerance,1);
 GLOBAL(int,mouse_y_halfing_tolerance,1);
@@ -1005,6 +1009,9 @@ typedef struct _lisa_clock
 } t_lisa_clock;
 
 DECLARE(t_lisa_clock,lisa_clock);
+
+GLOBAL(char, *floppy_access_block,NULL);
+GLOBAL(char, *profile_access_block,NULL);
 
 GLOBAL(int32,lisa_alarm,0);
 GLOBAL(uint8,lisa_clock_set_idx,0);
@@ -1575,9 +1582,9 @@ extern void on_lisa_exit(void);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 #define ALERT_LOG( level, fmt, args... )                                                         \
     { if ( (level <= DEBUGLEVEL) ) {                                                             \
-            fprintf((buglog ? buglog:stderr),"%s:%s:%d:",__FILE__,__FUNCTION__,__LINE__);        \
-            fprintf((buglog ? buglog:stderr),  fmt , ## args);                                   \
-            fprintf((buglog ? buglog:stderr),"| %x%x:%x%x:%x%x.%x %ld\n",                        \
+            fprintf((buglog!=NULL ? buglog:stderr),"%s:%s:%d:",__FILE__,__FUNCTION__,__LINE__);  \
+            fprintf((buglog!=NULL ? buglog:stderr),  fmt , ## args);                             \
+            fprintf((buglog!=NULL ? buglog:stderr),"| %x%x:%x%x:%x%x.%x %ld\n",                  \
                           lisa_clock.hours_h,lisa_clock.hours_l,                                 \
                           lisa_clock.mins_h,lisa_clock.mins_l,                                   \
                           lisa_clock.secs_h,lisa_clock.secs_l,                                   \

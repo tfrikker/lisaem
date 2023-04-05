@@ -699,6 +699,8 @@ static void do_floppy_read(DC42ImageType *F)
 
         sectornumber=getsectornum(F, floppy_ram[SIDE], floppy_ram[TRACK], floppy_ram[SECTOR]);
 
+        snprintf(floppy_access_block,32,"Floppy R:%04d",sectornumber);
+
         #ifdef DEBUG
         if (sectornumber!=queuedsectornumber && queuedsectornumber>0)
         {
@@ -742,9 +744,12 @@ static void do_floppy_read(DC42ImageType *F)
         ptr=dc42_read_sector_data(F,sectornumber);  if (!ptr) {DEBUG_LOG(0,"Could not read sector #%ld",sectornumber); return;}
         memcpy(&floppy_ram[DISKDATASEC],ptr,F->datasize);
 
-        if (sectornumber==0) {
+
+        extern void get_los_version_from_mddf(DC42ImageType *F);
+        if (sectornumber==0 && (bootblockchecksum==0) ) {
             bootblockchecksum=0;
             for (uint32 i=0; i<F->datasize; i++) bootblockchecksum=( (uint32)(bootblockchecksum<<1) | ((uint32)(bootblockchecksum & 0x80000000) ? 1:0) ) ^ (uint32)ptr[i] ^ i;
+            get_los_version_from_mddf(F);
         }
 
         DEBUG_LOG(0,"reading tags for sector %d",sectornumber);
@@ -755,6 +760,7 @@ static void do_floppy_read(DC42ImageType *F)
             for (uint32 i=0; i<F->tagsize; i++) bootblockchecksum=( (bootblockchecksum<<1) | ((bootblockchecksum & 0x80000000) ? 1:0) ) ^ ptr[i] ^ i;
 
             ALERT_LOG(0,"Bootblock checksum:%08x",bootblockchecksum);
+            running_lisa_os_boot_device=1;
 
             if (bootblockchecksum==0xce0cbba3 && macworks4mb) enable_4MB_macworks(); 
         }
@@ -793,6 +799,7 @@ static void do_floppy_read(DC42ImageType *F)
 
         if ( sectornumber==-1)            { DEBUG_LOG(0,"Invalid floppy write sector %ld",sectornumber);                      RWTS_IRQ_SIGNAL(FLOP_STAT_INVSEC); return;}
 
+        snprintf(floppy_access_block,32,"Floppy W:%04d",sectornumber);
 
         #ifdef DEBUG
         if (sectornumber!=queuedsectornumber  && queuedsectornumber>0)

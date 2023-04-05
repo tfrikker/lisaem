@@ -585,6 +585,8 @@ enum
 
     ID_EMULATION_TIMER,
 
+    ID_THROTTLE0_25,
+    ID_THROTTLE0_5,
     ID_THROTTLE1,
     ID_THROTTLE5,
     ID_THROTTLE8,
@@ -780,6 +782,8 @@ public:
     void OnThrottle256(wxCommandEvent& event);
 
     #ifdef DEBUG
+    void OnThrottle0_25(wxCommandEvent& event);
+    void OnThrottle0_5(wxCommandEvent& event);
     void OnThrottle1(wxCommandEvent& event);
     void OnThrottle512(wxCommandEvent& event);
     #endif
@@ -857,35 +861,35 @@ public:
 
     wxStopWatch runtime;               // idle loop stopwatch
     wxStopWatch soundsw;
-    int soundplaying;
+    int         soundplaying;
 
-    uint16 lastt2;
-    long    last_runtime_sample;
-    long    last_display_sample;
-    long    last_decisecond;
-    XTIMER clx;
-    XTIMER lastclk;
-    XTIMER cpu68k_reference;
-    XTIMER last_runtime_cpu68k_clx;
-    int dwx,dwy;
+    uint16      lastt2;
+    long        last_runtime_sample;
+    long        last_display_sample;
+    long        last_decisecond;
+    XTIMER      clx;
+    XTIMER      lastclk;
+    XTIMER      cpu68k_reference;
+    XTIMER      last_runtime_cpu68k_clx;
+    int         dwx,dwy;
 
-    float          throttle;
-    float          clockfactor;
-    float          mhzactual;
+    float       throttle;
+    float       clockfactor;
+    float       mhzactual;
 
-    wxString floppy_to_insert;
-    long lastcrtrefresh;
-    long hostrefresh;
-    long onidle_calls;
-    XTIMER cycles_wanted;
+    wxString    floppy_to_insert;
+    long        lastcrtrefresh;
+    long        hostrefresh;
+    long        onidle_calls;
+    XTIMER      cycles_wanted;
 
-    wxString skindir;
-    wxString skinname;
-    wxString resdir;
-    wxString osslash;
+    wxString    skindir;
+    wxString    skinname;
+    wxString    resdir;
+    wxString    osslash;
 
-    wxTimer* m_emulation_timer;
-    int barrier;
+    wxTimer*    m_emulation_timer;
+    int         barrier;
     DECLARE_EVENT_TABLE()
 };
 
@@ -973,6 +977,8 @@ BEGIN_EVENT_TABLE(LisaEmFrame, wxFrame)
     EVT_MENU(ID_RAWKBBUF,        LisaEmFrame::OnRAWKBBUF)
 
     #ifdef DEBUG
+    EVT_MENU(ID_THROTTLE0_25,    LisaEmFrame::OnThrottle0_25)
+    EVT_MENU(ID_THROTTLE0_5,     LisaEmFrame::OnThrottle0_5)
     EVT_MENU(ID_THROTTLE1,       LisaEmFrame::OnThrottle1)
     EVT_MENU(ID_THROTTLEX,       LisaEmFrame::OnThrottle512)
     #endif
@@ -1563,30 +1569,52 @@ enum {
                     // would need to add these to the skins as well.
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef USEOPENAL
-#include <LisaEmSoundOpenAl.h>
+#ifdef NOSOUND
 
-float normalthrottle=0;
+    extern "C" int      IsSoundPlaying(int soundid)                         {return 0;}
+    extern "C" int      IsSoundLoaded(int soundid)                          {return 1;}
+    extern "C" void     StopSound(int soundid)                              {return  ;}
+    extern "C" void     PlaySound(int soundid, int flags)                   {return  ;}
+    extern "C" void     sound_play(uint16 t2, uint8 SR, uint8 floppy_iorom) {return  ;}
+    extern "C" void     sound_off(void)                                     {return  ;}
+               void     InitSounds(wxString skindir, LisaSkin *skin)        {return  ;}
+               void     DestroySounds(void)                                 {return  ;}
 
-// -- Glue C wrappers/protos -----------------------------------------------------------------------------------------------------------------------------------
-// soundid is the enum below.
-extern "C" int      IsSoundPlaying(int soundid)                  {if (my_lisaem_openal) return my_lisaem_openal.IsSoundPlaying(soundid); else return 0;}
-extern "C" int      IsSoundLoaded(int soundid)                   {if (my_lisaem_openal) return my_lisaem_openal.IsSoundLoaded(soundid); else return 0;}
-extern "C" void     StopSound(int soundid);                      {if (my_lisaem_openal)        my_lisaem_openal.StopSound(soundid);}
-extern "C" void     PlaySound(int soundid);                      {if (my_lisaem_openal)        my_lisaem_openal.PlaySound(soundid);}
-extern "C" void     InitSounds(wxString skindir, LisaSkin skin)  {if (my_lisaem_openal)        my_lisaem_openal.InitSound(skindir, skin);}
-
-// these two are called from via65522.c:
-extern "C" void     sound_play(uint16 t2, uint8 SR, uint8 floppy_iorom) {if (my_lisaem_openal) my_lisaem_openal.soundplay(t2,SR,floppy_iorom);}
-extern "C" void     sound_off(void);                                    {if (my_lisaem_openal) my_lisaem_openal.soundoff();}
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #else
 
-#include "lisaem_sound_wx.cpp"
+    #ifdef USEOPENAL
+    
+        #include <LisaEmSoundOpenAL.h>
+        
+        float normalthrottle=0;
+        
+        // -- Glue C wrappers/protos -----------------------------------------------------------------------------------------------------------------------------------
+        // soundid is the enum below.
+        extern "C" int      IsSoundPlaying(int soundid)                  {if (my_lisaem_openal) return my_lisaem_openal.IsSoundPlaying(soundid); else return 0;}
+        extern "C" int      IsSoundLoaded(int soundid)                   {if (my_lisaem_openal) return my_lisaem_openal.IsSoundLoaded(soundid); else return 0;}
+        extern "C" void     StopSound(int soundid);                      {if (my_lisaem_openal)        my_lisaem_openal.StopSound(soundid);}
+        extern "C" void     PlaySound(int soundid, int flags);           {if (my_lisaem_openal)        my_lisaem_openal.PlaySound(soundid);}
+        extern "C" void     InitSounds(wxString skindir, LisaSkin skin)  {if (my_lisaem_openal)        my_lisaem_openal.InitSound(skindir, skin);}
+        
+        // these two are called from via65522.c:
+        extern "C" void     sound_play(uint16 t2, uint8 SR, uint8 floppy_iorom) {if (my_lisaem_openal) my_lisaem_openal.soundplay(t2,SR,floppy_iorom);}
+        extern "C" void     sound_off(void);                                    {if (my_lisaem_openal) my_lisaem_openal.soundoff();}
+
+    extern "C" void     DestroySounds(void)                                 {return  ;}
+
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    #else
+    
+        #include "LisaEmSoundWx.cpp"
+    
+    #endif
 
 #endif
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -1733,8 +1761,30 @@ extern "C"  void dumpallscreenshot(void)
             dumpram(name);
             debug_screenshot();
 }
-
 #endif
+
+// this expression ( openfile.char_str(wxConvUTF8) ) returns a null string for say, 'Système de Bureau 2.0F I.dc42'
+// breaking access on EU and other non-USA paths, including in Windows where the username 
+// contains one of these UTF chars, same is likely true of ProFile paths stored in the user's home directory.
+// returns: error 84: Invalid or incomplete multibyte or wide character
+//
+// error 84: Invalid or incomplete multibyte or wide character
+//
+// So have to do this crazy thing here, by opening wxFFile first, getting back the same filename, and converting that
+// to UTF8, to get around "error 84: Invalid or incomplete multibyte or wide character" - not sure why this is so!
+char *GetCFileNamePath(wxString openfile) {
+      wxString i(openfile);
+      static char f[16384];
+      wxFFile wff;
+      if  ( wff.Open(i,"r") ) {
+             strncpy(f,wff.GetName().char_str(wxConvUTF8),16383);
+             ALERT_LOG(0,"wff C string: :::%s:::",f);
+             wff.Close();
+      }
+      return f;
+}
+
+
 
 void LisaEmFrame::Update_Status(long elapsed,long idleentry)
 {
@@ -1755,23 +1805,29 @@ void LisaEmFrame::Update_Status(long elapsed,long idleentry)
     if (vidhz>1000) {vidhz=vidhz/1000.0; s="KHz";}
     if (vidhz>1000) {vidhz=vidhz/1000.0; s="MHz";}
 
-    text.Printf(_T("CPU: %1.2f%s want:%1.2fMHz tick:%d, video refresh:%1.2f%s %c contrast:%02x %s %x%x:%x%x:%x%x.%x @%d/%08x clk_cycles:%lld"),
-                mhzactual,c,throttle,emulation_tick,
-                vidhz,s,  (videoramdirty ? 'd':' '),
-                contrast,
+
+    text.Printf(_T("CPU: %1.2f%s @%d/%08x cycles:%lld %s %x%x:%x%x:%x%x.%x  %s %s "),
+                mhzactual,c,
+                context,pc24,
+                cpu68k_clocks,
                 debug_log_enabled ? "TRACELOG":"",
+                
                 lisa_clock.hours_h,lisa_clock.hours_l,
                 lisa_clock.mins_h,lisa_clock.mins_l,
                 lisa_clock.secs_h,lisa_clock.secs_l,
                 lisa_clock.tenths,
-                context,pc24,cpu68k_clocks);
+                
+                floppy_access_block,
+                profile_access_block
+                );
 
     SetStatusBarText(text);
     screen_paint_update=0;
 
     // only issue is that this is called only on startup
-    if ( !(counter) ) update_menu_checkmarks(); // meh, there's some bugs in wxWidgets 3.1.1 and earlier on GTK where Radio buttons don't get updated, i.e. scale menu
+    if ( !(counter) ) {update_menu_checkmarks(); floppy_access_block[0]=0; profile_access_block[0]=0;}
     counter++; counter&=7;
+
     // these are independant of the execution loops on purpose, so that way we get a 2nd opinion as it were.
     last_runtime_sample=elapsed;
     last_runtime_cpu68k_clx=cpu68k_clocks;
@@ -1790,8 +1846,8 @@ void LisaEmFrame::Update_Status(long elapsed,long idleentry)
 
         if (on_start_floppy != "" )
         {
-            char s[1024];
-            strncpy(s,on_start_floppy.mb_str(wxConvUTF8),1023 );
+            char s[16384];
+            strncpy(s,GetCFileNamePath(on_start_floppy),16384);
             floppy_insert(s);
             wxMilliSleep(100);  // wait for insert sound to complete to prevent crash.
             my_lisaframe->floppy_to_insert=_T("");
@@ -1973,8 +2029,9 @@ void LisaEmFrame::OnEmulationTimer(wxTimerEvent& event)
 
         if  (cpu68k_clocks<10 && floppy_to_insert.Len())            // deferred floppy insert.
             {
-              const wxCharBuffer s = CSTR(floppy_to_insert);
-              int i=floppy_insert((char *)(const char *)s);
+              char s[16384];
+              strncpy(s,GetCFileNamePath(floppy_to_insert),16384);
+              int i=floppy_insert(s);
               floppy_to_insert=_T("");
               if (i) eject_floppy_animation();
             }
@@ -2828,7 +2885,7 @@ void save_global_prefs(void)
 }
 
 
-void LisaEmFrame::SetStatusBarText(wxString &msg) {SetStatusText(msg,0);}
+void LisaEmFrame::SetStatusBarText(wxString &msg) {if (!!msg && !!my_lisaframe) SetStatusText(msg,0);}
 
 DECLARE_APP(LisaEmApp)           // Implements LisaEmApp& GetApp()
 IMPLEMENT_APP(LisaEmApp)         // Give wxWidgets the means to create a LisaEmApp object //valgrind reports:: Conditional jump or move depends on uninitialised value(s)
@@ -2881,10 +2938,16 @@ void LisaEmApp::LisaSkinConfig(void)
 
 wxSize get_size_prefs(void);
 
+static char floppy_access_block_s[32];
+static char profile_access_block_s[32];
+
 // Initialize the application
 bool LisaEmApp::OnInit()
 {
     if (!wxApp::OnInit()) return false;      // call default behaviour (mandatory)
+
+    floppy_access_block=floppy_access_block_s;
+    profile_access_block=profile_access_block_s;
 
     wxStandardPathsBase& stdp = wxStandardPaths::Get();
     wxString defaultconfig=stdp.GetUserConfigDir();
@@ -3013,7 +3076,7 @@ bool LisaEmApp::OnInit()
     my_lisawin->repaintall = REPAINT_INVALID_WINDOW;
 
     // wxSound Play loading was here, moved to lisaem_sound_wx.cpp
-    void  InitSounds(wxString skindir, LisaSkin *skin);
+    //void  InitSounds(wxString skindir, LisaSkin *skin);
     InitSounds(my_lisaframe->skindir, &skin);
 
     ALERT_LOG(0,"Update ProFile menu");
@@ -5424,6 +5487,9 @@ int initialize_all_subsystems(void);
 
 void handle_powerbutton(void)
 {
+      if (my_lisawin==NULL) return;
+      if (my_lisaframe==NULL) return;
+
       ALERT_LOG(0,"======== ENTRY ================");
       ALERT_LOG(0,"powerstate: %d",my_lisawin->powerstate);
       ALERT_LOG(0,"running   : %d",my_lisaframe->running);
@@ -5540,24 +5606,43 @@ extern "C" void free_all_ipcts(void);
 extern "C" void lisa_rebooted(void)
 {
   setstatusbar("The Lisa is rebooting.");
+
+  my_lisaframe->running=emulation_off;                // no longer running
+  if  ((my_lisawin->floppystate & FLOPPY_ANIM_MASK)!=FLOPPY_EMPTY) 
+      {
+        eject_floppy_animation();
+        flushscreen();
+      }
+
+  on_startup_actions_done=0;                        // reset
+
+  unvars();                                         // reset global vars
+
   my_lisaconfig->Save(pConfig, floppy_ram);         // save PRAM, configuration
+  my_lisaframe->runtime.Pause();                    // pause the stopwatch
 
-  free_all_ipcts();
-  unvars();                                         // reset global vars and all
+  flushscreen();
+  iw_enddocuments();
+  my_lisaframe->hostrefresh=refresh_rate_used;
 
-  on_startup_actions_done=0;
-// can't debug in windows since LisaEm is not a console app, so redirect buglog to an actual file.
-#if defined(__WXMSW__)    && defined(DEBUG) 
-  buglog=fopen("lisaem-output.txt","a+");
-#endif
+  int ret=initialize_all_subsystems();
+  if  (!ret)
+      {
+        my_lisawin->powerstate|= POWER_NEEDS_REDRAW | POWER_ON;
+        my_lisaframe->running=emulation_running; 
+        my_lisaframe->runtime.Start(0);
+        my_lisaframe->lastcrtrefresh=0;
+      }    
+  else
+      if (!romless) wxMessageBox(_T("Power on failed."), _T("Poweron Failed"), wxICON_INFORMATION | wxOK);
+  if (ret>1) EXIT(999,0,"Out of memory or other fatal error.");  // out of memory or other fatal error!
+  contrast=0;
+  presspowerswitch();                      // send keyboard event.
+  my_lisaframe->UpdateProfileMenu();
 
-  my_lisaframe->running=emulation_off;              // prevent init_all_subs from barking
-  my_lisawin->powerstate = POWER_OFF;               // will be turned back on immediately
-  handle_powerbutton();                             // back on we go.
-  free_all_ipcts();
-  //free(lisaram);
-  //lisaram=NULL;
 }
+
+
 
 void LisaWin::OnMouseMove(wxMouseEvent &event)
 {
@@ -6323,6 +6408,13 @@ Throttle_MENU(256);
 #ifdef DEBUG
 Throttle_MENU(1);
 Throttle_MENU(512);
+
+  void LisaEmFrame::OnThrottle0_5(wxCommandEvent &WXUNUSED(event)) \
+    {  throttle = 0.5; reset_throttle_clock(); save_global_prefs(); update_menu_checkmarks(); ALERT_LOG(0,"Set CPU to %f MHz",throttle);}
+
+  void LisaEmFrame::OnThrottle0_25(wxCommandEvent &WXUNUSED(event)) \
+    {  throttle = 0.5; reset_throttle_clock(); save_global_prefs(); update_menu_checkmarks(); ALERT_LOG(0,"Set CPU to %f MHz",throttle);}
+
 #endif
 
 extern "C" void messagebox(char *s, char *t)  // messagebox string of text, title
@@ -6451,11 +6543,14 @@ void update_menu_checkmarks(void)
             }
 
         #ifdef DEBUG
-            throttleMenu->Check(ID_THROTTLEX,   my_lisaframe->throttle == 512 );
-            throttleMenu->Check(ID_THROTTLE1,   my_lisaframe->throttle ==  1.0);
+            throttleMenu->Check(ID_THROTTLEX,    my_lisaframe->throttle == 512.0 );
+            throttleMenu->Check(ID_THROTTLE1,    my_lisaframe->throttle ==   1.0 );
+            throttleMenu->Check(ID_THROTTLE0_5,  my_lisaframe->throttle ==   0.5 );
+            throttleMenu->Check(ID_THROTTLE0_25, my_lisaframe->throttle ==   0.25);
+
         #else
-            if (my_lisaframe->throttle>256.0) my_lisaframe->throttle=256.0;    
-        #endif
+            if (my_lisaframe->throttle>256.0)    my_lisaframe->throttle  =  256.0;    
+        #endif 
 
             throttleMenu->Check(ID_THROTTLE5,    my_lisaframe->throttle ==  5.0);
             throttleMenu->Check(ID_THROTTLE8,    my_lisaframe->throttle ==  8.0);
@@ -6692,15 +6787,18 @@ if  (sound_effects_on)
 
 void LisaEmFrame::OnFLOPPY(wxCommandEvent& WXUNUSED(event)) {OnxFLOPPY();}
 
+
 void LisaEmFrame::insert_floppy_anim(wxString openfile)
 {
     if (!openfile.Len()) return;
-    const wxCharBuffer s = CSTR(openfile);
+    char f[16384];
+    strncpy(f,GetCFileNamePath(openfile),16384);
 
     if (my_lisaframe->running) {
-        if (floppy_insert((char *)(const char *)s)) return;
+        ALERT_LOG(0,"Inserting floppy:::%s:::",  f  );
+        if (floppy_insert(f)) return;
     } 
-    else 
+    else
     {
         floppy_to_insert = openfile;
     }
@@ -7022,7 +7120,8 @@ LisaEmFrame::LisaEmFrame(const wxString& title)
     
 #ifndef __WXOSX__
     ALERT_LOG(0,"Setting icon");
-    SetIcon( wxICON( lisa2icon ));
+    wxIcon lisaemicon(resdir+osslash+"lisaem.png",wxBITMAP_TYPE_ANY,-1,-1);
+    SetIcon( lisaemicon );
 #endif
 
     if (skins_on)
@@ -7157,6 +7256,8 @@ LisaEmFrame::LisaEmFrame(const wxString& title)
     #endif
 
     #ifdef DEBUG
+    throttleMenu->AppendRadioItem(ID_THROTTLE0_25,    wxT("0.25 MHz"),wxT("0.25 MHz - Slowdown for debugging") );
+    throttleMenu->AppendRadioItem(ID_THROTTLE0_5,     wxT("0.50 MHz"),wxT("0.50 MHz - Slowdown for debugging") );
     throttleMenu->AppendRadioItem(ID_THROTTLE1,       wxT("1 MHz")  , wxT("1 MHz - Slowdown for debugging") );
     #endif
     throttleMenu->AppendRadioItem(ID_THROTTLE5,       wxT("5 MHz")  , wxT("5 MHz - Stock Lisa Speed, recommended.") );
@@ -7298,7 +7399,10 @@ LisaEmFrame::LisaEmFrame(const wxString& title)
 
     ALERT_LOG(0,"Welcome status")
 
-//    SetStatusText(wxT("Welcome to the Lisa Emulator Project!"));
+
+    floppy_access_block[0]=0;
+    profile_access_block[0]=0;
+
     char *t=get_welcome_fortune();
     SetStatusText(t);
     soundplaying=0;
@@ -7708,7 +7812,11 @@ void connect_device_to_via(int v, wxString device, wxString *file, wxString prof
           else return; // invalid via index
         }
 
-        t=strncpy(tmp,cSTR(file),MAXPATHLEN-1);
+
+        char f[16384];
+        strncpy(f,GetCFileNamePath(*file),16384);
+
+        t=strncpy(tmp,f,MAXPATHLEN-1);
         ALERT_LOG(0, "Attempting to attach VIA#%d to profile %s", v, tmp);
         if (!via[v].ProFile) via[v].ProFile = (ProFileType *)calloc(1,sizeof(ProFileType));  // valgrind reports leak here, but it's ok, just not freed before exit
 
@@ -7931,7 +8039,12 @@ int romlessboot_pick(void) //returns 0=profile, 1=floppy
   {
       if (!my_lisaframe->floppy_to_insert.Len()) my_lisaframe->OnxFLOPPY();
       if (!my_lisaframe->floppy_to_insert.Len()) return -1;  // if the user hasn't picked a floppy, abort.
-      int i=floppy_insert(CSTR(my_lisaframe->floppy_to_insert));
+
+      // have to do this crazy thing to get around an issue, see void LisaEmFrame::insert_floppy_anim(wxString openfile)
+      char f[16384];
+      strncpy(f,GetCFileNamePath(my_lisaframe->floppy_to_insert),16384);
+
+      int i=floppy_insert(f);
       wxMilliSleep(100);  // wait for insert sound to complete to prevent crash.
       if (i) { eject_floppy_animation(); return -1;}
       my_lisaframe->floppy_to_insert=_T("");
@@ -7974,6 +8087,9 @@ int initialize_all_subsystems(void)
 
     if (my_lisaframe->running) {ALERT_LOG(0,"Already running!"); 
                                 return 0;}
+
+    floppy_access_block=floppy_access_block_s;
+    profile_access_block=profile_access_block_s;
 
     ALERT_LOG(0,"Initializing all subsystems...")
     #ifdef DEBUGLOG_ON_START
@@ -8169,14 +8285,15 @@ int initialize_all_subsystems(void)
     ALERT_LOG(0,"\n\nmmu_trans_all size: %d bytes\n\n",sizeof(mmu_trans_all));
 
 
-    DEBUG_LOG(0,"Loading Lisa ROM");
+    ALERT_LOG(0,"Loading Lisa ROM");
     strncpy(tmp, CSTR(my_lisaconfig->rompath ),MAXPATHLEN-1);
+    // DTC ROM is the text output of the assembler of the H ROM sources, it was used for debugging the emulator
     if  (read_dtc_rom(tmp,   lisarom)==0)
         {
             if  (checkromchksum())
                 {
                   if (!yesnomessagebox( "BOOT ROM checksum doesn't match, this may crash the emulator.  Continue anyway?",
-                                        "ROM Checksum mismatch"))   return -2;
+                                        "ROM Checksum mismatch"))   {lisa_powered_off(); return -2;}
                 }
               DEBUG_LOG(0,"Load of DTC assembled ROM successful");
               fixromchk();
@@ -8186,10 +8303,10 @@ int initialize_all_subsystems(void)
               if  (checkromchksum())
                   {
                     if (!yesnomessagebox( "BOOT ROM checksum doesn't match, this may crash the emulator.  Continue anyway?",
-                                          "ROM Checksum mismatch")  ) return -2;
+                                          "ROM Checksum mismatch")  ) {lisa_powered_off(); return -2;}
                   }
   
-              DEBUG_LOG(0,"Load of split ROM");
+              ALERT_LOG(0,"Load of split ROM");
               fixromchk();
             }
     else if (read_rom(tmp,       lisarom)==0)
@@ -8197,16 +8314,16 @@ int initialize_all_subsystems(void)
               if  (checkromchksum())
                   {
                     if (!yesnomessagebox( "BOOT ROM checksum doesn't match, this may crash the emulator.  Continue anyway?",
-                                          "ROM Checksum mismatch")  ) return -2;
+                                          "ROM Checksum mismatch")  ) {lisa_powered_off(); return -2;}
                   }
   
-              DEBUG_LOG(0,"Load of normal ROM successful");
+              ALERT_LOG(0,"Load of normal ROM successful");
               fixromchk();
             }
     else  
             {
               romless=1; //0=profile, 1=floppy
-              pickprofile=romlessboot_pick(); if (pickprofile<0) return -2;
+              pickprofile=romlessboot_pick(); if (pickprofile<0) {lisa_powered_off(); return -2;}
               ALERT_LOG(0,"picked %d",pickprofile);
             }
   

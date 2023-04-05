@@ -2,6 +2,52 @@
 Lisa Emulator Change History                         http://lisaem.sunder.net/
 ------------------------------------------------------------------------------
 
+
+This does not work, only use just incase I kick the bucket to debug
+
+2022.12.18-12.24 - in hospital, very sick
+
+
+
+2022.11.22 added LOS 2.0 HLE ProFile read/write block, but when HLE is turned
+           on LOS 2.0 booting from ProFile resets to Boot ROM. (It times out
+           in a procedure named FLUSHFIL(e?) and then reboots.)
+
+
+...
+           [ very sick, low energy, lots of pain ]
+...
+
+
+2022.10.30 - fixup ROM stitching for 341-017x named boot ROMs.
+
+2022.10.28 - fixup reboot issues
+
+2022.10.27 - bugfix: LOS 2.0 USA now able to install again
+
+2022.10.19 - possible hacky fix for opening some UTF8 file path issues such
+             as 'Système de Bureau 2.0F I.dc42' - tested to work on Linux
+             so far
+
+2022.10.06 - 2022.10.13 ER/Hospital stay
+
+2022.10.06 - fixed files with CRLF endings in repo
+
+           - added 0.25MHz and 0.5MHz throttle for --tracelog enabled builds
+             this is useful because Wayland doesn't update the display
+             otherwise and it's hard to isolate turning tracelog on/off at
+             the right times using Right-Click. So the fix is to set 0.25MHz
+             right before turning on tracelog.
+
+2022.10.05 - debugging LOS 2.0 install issues writing to ProFile HD
+
+2022.10.04 - added --no-sound and --no-openal options to build.sh
+
+2022.09.30 - merged in fixes from Tom Frikker to lisafsh-tool and
+             los-deserialize
+
+2022.09.23 - added "livedev" branch to github
+
 2022.09.12 - added LOS FS 1.x, 2.x directory listing to lisafsh-tool, but
              missing file size.
 
@@ -16,8 +62,6 @@ Lisa Emulator Change History                         http://lisaem.sunder.net/
 2022.08.15 - gathering ESC codes for ADWP, PJ1080A printers for ~v1.2.8
 
 2022.08.xx - more openAL work
-
-2022.07.27 - RC5? RELEASE? TBD
 
 2022.07.15 - fix lisafsh-tool readline enter for next sector, q=quit
 

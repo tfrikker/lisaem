@@ -208,6 +208,8 @@ char *get_welcome_fortune(void)
   "Quick! Hide in this closet!",
   "Round Rects! Round Rects! Round Rects!",
   "Under the surface we're not machines, under the surface we're living dreams",
+  "Look in my eyes, Look in my eyes, It's not over, I will survive, I will survive",
+  "Breathing new life now, I will regenerate",
   "I am the disruptor. Follow your own way. Nothing can define you. Break off, disobey. I refuse. I resist.",
   "...we're all emulations, in the end. Just make it a good one, eh?",
   "\"Jinkies! Old man Jobs tried to kill the Lisa!\" \"And I would have gotten away with it too if it weren't for you meddeling kids!\"",
@@ -649,6 +651,7 @@ char *get_welcome_fortune(void)
   "His eyes are ablaze, See the madman in his gaze, emulate on your way, like an Eagle II, emulate as high as the sun",
 
   "Who’s the goat? Who’s the goat?  Heidrun, Heidrun",
+  "When it seems all hope is gone, I'll find a way, or make one!",
 
   "Cherry ice cream smile I suppose it's very nice",
   "And when she shines she really shows you all she can",
@@ -1459,7 +1462,7 @@ char *get_welcome_fortune(void)
   "\"Intended for fish only.\"",
   "\"Fish don't gots no good emulators to emulate!\" - Skwisgaar Skwigapple",
   "\"Many years ago, something grew inside of Apple, that thing was a Lisa! Lisa! Lisa! ... You're running out of life!\"",
-  \"He's slowly learning how to un-program the emulator\" - Skwisgaar",
+  "\"He's slowly learning how to un-program the emulator\" - Skwisgaar",
   "Go FORTH, be emulated, go FORTH and run! Open up your textbooks and turn to the chapter concerning your 68000 code",
   "\"No Ray, you do not get a banana sticker, not until you have proven yourself by pushing a release, until then these banana stickers shall remain locked in here\" - Dr. Jonathan Twinkletits",
   "\"This emulators is dildoes.\"",
@@ -1649,6 +1652,7 @@ char *get_welcome_fortune(void)
   "The end will justify the means, but in the end it stays the same",
   "I've fallen out of touch with who you think I am",
   "I can't pretend to care about how this will end",
+  "Grayscale eyes slide, from black to white, lived through dark days, stillness in a crashing wave",
 
   "I am the son and the heir Of a shyness that is criminally vulgar...  Of nothing in particular",
   "shut your mouth, how can you say I go about things the wrong way?  I am human and I need to be loved Just like everybody else does",
@@ -1791,6 +1795,24 @@ char *get_welcome_fortune(void)
   "Initializing finite probability drive . . .",
   "Serial (Port) Experiments LisaEm",
   "youtu.be/izDc3G9ZRfw Never gonna give you up, never gonna let you down, never gonna run around and desert you...",
+
+  "\"As the area of our knowledge grows, so too does the perimeter of our ignorance\" - Neil deGrasse Tyson",
+  "\"I know of no time in human history where ignorance was better than knowledge.\" - Neil deGrasse Tyson",
+  "\"The cross pollination of disciplines is fundamental to truly revolutionary advances in our culture.\" - Neil deGrasse Tyson",
+  "\"Science is basically an inoculation against charlatans.\" - Neil deGrasse Tyson",
+  "\"I don't want people to say, 'Something is true because Tyson says it is true.' That's not critical thinking.\" - Neil deGrasse Tyson",
+  "\"'Boldly going where hundreds have gone before' does not make headlines.\" - Neil deGrasse Tyson",
+  "\"The Lisa is under no obligation to make sense to you.\" - Neil deGrasse Tyson",
+  "\"I lose sleep at night wondering whether we are intelligent enough to figure out the Lisa. I don't know.\" - Neil deGrasse Tyson",
+  "\"We're going to emulate a Lisa, and do these other things, not because they're easy, but because they are hard\"",
+  "\"I know of no time in human history where ignorance was better than knowledge.\" - Neil deGrasse Tyson",
+
+  "Kill the Wabbit?",
+  "Oh Mighty Warrior of Great Fighting Stock, might I enquire, What's Up Doc?",
+  "That was the Wabbit!",
+  "Well what did you expect in an opera, a happy ending?",
+
+  "The lion lives in the heart",
 
   "Do not summon (BillG) AT ALL COSTS!",
   "Thanks billg, I now hate corn!", 
