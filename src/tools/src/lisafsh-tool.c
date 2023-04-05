@@ -35,8 +35,8 @@ typedef struct {
 } sorttag_type;
 
 
-int *sorttag=NULL;                       // sorted tags
-uint8 *allocated=NULL;
+int *sorttag = NULL;                       // sorted tags
+uint8 *allocated = NULL;
 
 DC42ImageType F;
 
@@ -186,20 +186,20 @@ char *cmdstrings[LASTCOMMAND+2] = {
 
 
 #ifndef MIN
-  #define MIN(x,y) ( (x)<(y) ? (x):(y) )
+  #define MIN(x,y) ( (x) < (y) ? (x) : (y) )
 #endif
 
 #ifndef MAX
-  #define MAX(x,y) ( (x)>(y) ? (x):(y) )
+  #define MAX(x,y) ( (x) > (y) ? (x) : (y) )
 #endif
 
 
 // Prototypes and Macros //////////////////////////////////////////////////////////////////////
 
 // careful, cannot use ++/-- as parameters for TAGFILEID macro.
-#define TAGFILEID(xmysect)  (tagfileid(F,xmysect))
-#define TAGFFILEID(xmysect) (tagfileid(&F,xmysect))
-#define TAGABSNEXT(xmysect)  (tagabsnext(F,xmysect))
+#define TAGFILEID(xmysect)  (tagfileid(F, xmysect))
+#define TAGFFILEID(xmysect) (tagfileid(&F, xmysect))
+#define TAGABSNEXT(xmysect)  (tagabsnext(F, xmysect))
 
 void getcommand(void);
 int  floppy_disk_copy_image_open(DC42ImageType *F);
@@ -263,7 +263,7 @@ uint32 hex2long(uint8 *s) {
 }
 
 uint16 tagabsnext(DC42ImageType *F,int mysect) {
-  uint8 *tag = dc42_read_sector_tags(F,mysect);
+  uint8 *tag = dc42_read_sector_tags(F, mysect);
   if (!tag) {
     return 0;
   }
@@ -296,11 +296,11 @@ int tagcmp(const void *p1, const void *p2) {
   uint32 fileid1, fileid2,  abs1, abs2, next1, next2, prev1, prev2;
 
   // turn voids into sort tag types
-  int i = ( *(int *)p2 );
-  int j = ( *(int *)p1 );
+  int i = ( *(int *) p2 );
+  int j = ( *(int *) p1 );
 
   fileid1 = tagfileid(&F, i); // sadly we have to use the global variable here since qsort won't let us pass extra args
-  fileid2 = tagfileid(&F,j);
+  fileid2 = tagfileid(&F, j);
 
   if (F.tagsize<20) { // floppy?
     abs1 = tagpair(&F, i, 6)  & 0x7ff;
@@ -359,7 +359,7 @@ void dump_mddf(FILE *out, DC42ImageType *F) {
 
       if (TAGFILEID(sect) == TAG_MDDF) {
         volname_len = sec[0xc];
-        for (j = 0, i = 0x0d; j < volname_len; i++,j++) {
+        for (j = 0, i = 0x0d; j < volname_len; i++, j++) {
           volumename[j] = sec[i];
         }
 
@@ -388,8 +388,8 @@ void dump_mddf(FILE *out, DC42ImageType *F) {
      }
   }
 
-  fprintf(out,"\n-----------------------------------------------------------------------------\n");
-  fprintf(out,"MDDF Volume Name: \"%s\"\n", volumename);
+  fprintf(out, "\n-----------------------------------------------------------------------------\n");
+  fprintf(out, "MDDF Volume Name: \"%s\"\n", volumename);
  
   switch(fsversion) {
     case 0x00: fprintf(out, "FS Version information not found or MDDF version=0 or bad MMDF!\n"); break;
@@ -820,7 +820,7 @@ void get_dir_file_names(DC42ImageType *F) {
 
               strncat(directory, temp, 65535); // add filename to directory.
 
-              filenamecleanup(filenames[fileid][0],filenames[fileid][1]); // clean it up, now output name is set
+              filenamecleanup(filenames[fileid][0], filenames[fileid][1]); // clean it up, now output name is set
 
               //aliasname = 63 chars max starts at 0x182 (what's 180-181? set to 00 02, what are the fields following?)
               if (fsec[0x182]) {
@@ -894,43 +894,44 @@ void dump_allocation_bitmap(FILE *out, DC42ImageType *F) {
 void filenamecleanup(char *in, char *out) {
   uint32 j;
   char c;
-  for (j=0; in[j] && j<63; j++)     // santize file name for most host OS's.
-  {                                 // some of these are over cautious, i.e. spaces can be escaped in unix, etc...
+  for (j = 0; in[j] && j<63; j++) {     // santize file name for most host OS's.
+                                    // some of these are over cautious, i.e. spaces can be escaped in unix, etc...
                                     // but I want to make sure we don't cause needless trouble and require escaping
                                     // with lots of backslashes, etc.  In fact, you can even build file names containing
                                     // wildcards and slashes in unix, but accessing them from the commandline becomes
                                     // an excercise in backslash insanity
-    c=in[j];
-    switch(c)
-      {
-        case '"' :               // get rid of quotes
-        case '`' :
-        case '\'':
-        case '?' :               // wild cards
-        case '*' :
-        case '/' : // slashes
-        case '\\': c='-'; break;
-        case ':' : c='-'; break; // colons for MSFT OS's
+    c = in[j];
+    switch(c) {
+      case '"' :               // get rid of quotes
+      case '`' :
+      case '\'':
+      case '?' :               // wild cards
+      case '*' :
+      case '/' : // slashes
+      case '\\': c = '-'; break;
+      case ':' : c = '-'; break; // colons for MSFT OS's
 
-        case '!' :               // !'s for unix
-        case '&' :               // this means background in most unix shells.
-        case '$' :               // shell environment variables for unix + windows
-        case '%' :
+      case '!' :               // !'s for unix
+      case '&' :               // this means background in most unix shells.
+      case '$' :               // shell environment variables for unix + windows
+      case '%' :
 
-        case '<' :               // redirects and pipe
-        case '>' :
-        case '|' :
-        case '(' :
-        case ')' :
-        case '[' :
-        case ']' :
-                  c='_';
-      }
-    if (c<33 || c>126) c='_';     // control and high chars
+      case '<' :               // redirects and pipe
+      case '>' :
+      case '|' :
+      case '(' :
+      case ')' :
+      case '[' :
+      case ']' :
+        c = '_';
+    }
+    if (c < 33 || c > 126) {
+      c = '_';     // control and high chars
+    }
 
-    out[j]=c;
+    out[j] = c;
   }
-  out[63]=0; // make double dog sure the string is terminated;
+  out[63] = 0; // make double dog sure the string is terminated;
 }
 
 // Walk the directory catalog and read all of the file names stored in there
@@ -1082,28 +1083,28 @@ void extract_files(DC42ImageType *F) {
         chop0xf0 = 0;  // boot sector
       }
       if (fileid == TAG_OS_LOADER ) {
-        chop0xf0=0;  // os loader
+        chop0xf0 = 0;  // os loader
       }
       if (fileid == TAG_ERASED_BLK) {
-        chop0xf0=0;  // deleted blocks
+        chop0xf0 = 0;  // deleted blocks
       }
       if (fileid == TAG_FREE_BLOCK) {
-        chop0xf0=0;  // free blocks
+        chop0xf0 = 0;  // free blocks
       }
       if (fileid == TAG_MDDF      ) {
-        chop0xf0=0;  // mddf
+        chop0xf0 = 0;  // mddf
       }
       if (fileid == TAG_FREEBITMAP) {
-        chop0xf0=0;  // allocation bitmap
+        chop0xf0 = 0;  // allocation bitmap
       }
       if (fileid == TAG_S_RECORDS ) {
-        chop0xf0=0;  // s-records
+        chop0xf0 = 0;  // s-records
       }
       if (fileid == TAG_DIRECTORY ) {
-        chop0xf0=0;  // directory
+        chop0xf0 = 0;  // directory
       }
       if (fileid > TAG_MAXTAG     ) {
-        chop0xf0=0;  // catch other unknown file ids
+        chop0xf0 = 0;  // catch other unknown file ids
       }
 
       snprintf(newfilex, 1024, "%s.txt", newfile);
@@ -1116,7 +1117,7 @@ void extract_files(DC42ImageType *F) {
       }
 
       snprintf(newfileb, 1024, "%s.bin", newfile);
-      fb = fopen(newfileb,"wb");
+      fb = fopen(newfileb, "wb");
       if (!fb) {
         fprintf(stderr, "Couldn't create file %s\n", newfileb);
         perror("\n"); 
@@ -1134,7 +1135,7 @@ void extract_files(DC42ImageType *F) {
         if (!fh) {
           fprintf(stderr, "Couldn't create file %s\n", newfilemb);
           perror("\n");
-          int i=chdir("..");
+          int i = chdir("..");
           return;
         }
         //sec=&(sectors[sect * sectorsize]);
@@ -1190,7 +1191,7 @@ void extract_files(DC42ImageType *F) {
         fprintf(fx, "\n\n[Metadata from bytes 0x0000-0x00ef]\n");
         printsector(fx, F, sect, F->datasize);
 
-        oldfileid=fileid;             // set up for next round
+        oldfileid = fileid;             // set up for next round
         continue;                 // skip to the next sector, this one is done ----------------
       } // end of chop0xf0 ----------------------------------------------------------------------
     } // end of new file comparison on oldfileid/fileid  ----------------------------------------
@@ -1312,7 +1313,7 @@ void extract_file_extents_from_tags(DC42ImageType *F) {
 
     // now, write the sector number -------------------------------------------------------------
 	  if (lastsector + 1 == sect) { // squeeze down ranges into extent lists
-      is_range=1;
+      is_range = 1;
     } else {
 		  printf(" - %04x(%d)\n", lastsector);
 		  printf("%04x(%d) ", sect, sect);
@@ -1415,7 +1416,7 @@ void getcommand(void) {
       if (cmd_line[i] < 31) {
         cmd_line[i] = ' ';
       }
-      if (line[i]<31) {
+      if (line[i] < 31) {
         line[i] = ' ';
       }
     }
@@ -1447,7 +1448,7 @@ void getcommand(void) {
     if (cmd_line[i] < 31) {
       cmd_line[i] = ' ';
     }
-    if (line[i]<31) {
+    if (line[i] < 31) {
       line[i] = ' ';
     }
   }
@@ -1513,7 +1514,7 @@ void getcommand(void) {
   // shortcut for sector number
   iargs[0] = strtol(line, NULL, 0); 
   if (line[0] >= '0' && line[0] <= '9' ) {
-    command=0; 
+    command = 0; 
     return;
   }
 
@@ -1615,7 +1616,7 @@ void printsectheader(FILE *out, DC42ImageType *F, uint32 sector) {
     }
 
     fprintf(out, "tags:       ");
-    hexprint(out, (char *)dc42_read_sector_tags(F,sector), F->tagsize, 0);
+    hexprint(out, (char *)dc42_read_sector_tags(F, sector), F->tagsize, 0);
 
     if (F->tagsize == 12) {
       fprintf(out, "\n           |volid| ??  |fileid|absnext|next|previous\n");
@@ -1802,7 +1803,7 @@ void cli(DC42ImageType *F) {
           for (i = 0; i < F->numblocks - 1; i++) {
             if ((unsigned)sorttag[i] == sector) {
               newsector = sorttag[i + 1]; 
-              printsector(stdout, F,sector, F->datasize);
+              printsector(stdout, F, sector, F->datasize);
               break;
             }
           }  
@@ -1887,7 +1888,7 @@ void cli(DC42ImageType *F) {
           // modify
           {
             unsigned int i;
-            for (i = offset, j = 1; i < F->datasize && cargs[j] != NULL; i++,j++) {
+            for (i = offset, j = 1; i < F->datasize && cargs[j] != NULL; i++, j++) {
               mysector[i] = hargs[j];
             }
           }
@@ -1929,7 +1930,7 @@ void cli(DC42ImageType *F) {
             printf("****WARNING, WRITE FAILED!****\n");
           }
 
-          printsector(stdout,F,sector,F->datasize);
+          printsector(stdout, F, sector, F->datasize);
         }
         break;
       case LOADSEC_CMD: {
@@ -2098,7 +2099,7 @@ void cli(DC42ImageType *F) {
             }
 
             if (offset + 4 != newoffset) {
-              printf("Sector#:%d Unexpected offset:%08x (wanted:%08x) data might be corrupted\n", newoffset, offset+4, sector_number);
+              printf("Sector#:%d Unexpected offset:%08x (wanted:%08x) data might be corrupted\n", newoffset, offset + 4, sector_number);
             }
             offset = newoffset;
           }
@@ -2192,7 +2193,7 @@ void cli(DC42ImageType *F) {
               img2 = dc42_read_sector_data(&F2, sec);
               if (img1 != NULL && img2 != NULL) {
                 for (i=0; i < secsize; i++) {
-                  if (img1[i]!=img2[i]) {
+                  if (img1[i] != img2[i]) {
                     printf("sec:%4d data offset #%03x <%02x >%02x and more...\n", sec, i, img1[i], img2[i]);
                     i = secsize; 
                     differs = 1;
@@ -2430,7 +2431,7 @@ int main (int argc, char *argv[]) {
 
   if (dc42_has_tags(&F)) {
     if (!tagsaresorted) {
-      fprintf(stderr,"Sorting tags\n");
+      fprintf(stderr, "Sorting tags\n");
       sorttags(&F);
       tagsaresorted = 1;
       havetags = 1;
