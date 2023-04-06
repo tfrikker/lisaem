@@ -121,7 +121,7 @@ enum command_enum command;
 #define QUITCOMMAND 23
 #define LASTCOMMAND 24
 
-char *cmdstrings[LASTCOMMAND+2] = {
+char *cmdstrings[LASTCOMMAND + 2] = {
   "sector",
   "cluster",
   "display",
@@ -302,22 +302,22 @@ int tagcmp(const void *p1, const void *p2) {
   fileid1 = tagfileid(&F, i); // sadly we have to use the global variable here since qsort won't let us pass extra args
   fileid2 = tagfileid(&F, j);
 
-  if (F.tagsize<20) { // floppy?
-    abs1 = tagpair(&F, i, 6)  & 0x7ff;
-    abs2 = tagpair(&F, j, 6)  & 0x7ff;
+  if (F.tagsize < 20) { // floppy?
+    abs1 = tagpair(&F, i, 6) & 0x7ff;
+    abs2 = tagpair(&F, j, 6) & 0x7ff;
 
-    next1 = tagpair(&F, i, 8)  & 0x7ff;
-    next2 = tagpair(&F, j, 8)  & 0x7ff;
+    next1 = tagpair(&F, i, 8) & 0x7ff;
+    next2 = tagpair(&F, j, 8) & 0x7ff;
 
     prev1=tagpair(&F,i,10) & 0x7ff;
     prev2=tagpair(&F,j,10) & 0x7ff;
   } else { // hard drive                      
     //012345
-    abs1 = tagpair(&F, i, 8)  & 0x7fffff;
-    abs2 = tagpair(&F, j, 8)  & 0x7fffff;
+    abs1 = tagpair(&F, i, 8) & 0x7fffff;
+    abs2 = tagpair(&F, j, 8) & 0x7fffff;
 
-    next1 = tagpair(&F, i, 0x0e)  & 0x7fffff;
-    next2 = tagpair(&F, j, 0x0e)  & 0x7fffff;
+    next1 = tagpair(&F, i, 0x0e) & 0x7fffff;
+    next2 = tagpair(&F, j, 0x0e) & 0x7fffff;
 
     prev1 = tagpair(&F, i, 0x12) & 0x7fffff;
     prev2 = tagpair(&F, j, 0x12) & 0x7fffff;
@@ -350,21 +350,8 @@ void dump_mddf(FILE *out, DC42ImageType *F) {
   uint32 sector, sect;
   uint8 volname_len;
 
-  if (!volumename[0]) { // if we already did the work don't bother.
-    //fprintf(out, "Searching for MDDF block.\n");
-    for (sector = 0; sector < F->numblocks; sector++) {
-      sect = sorttag[sector];
-
-      sec = (uint8 *)dc42_read_sector_data(F, sect); //&(sectors[sect*sectorsize]);
-
-// Dump the data in the MDDF - Thanks to Chris McFall for this info.  :)
-void dump_mddf(FILE *out, DC42ImageType *F) {
-  uint8 *sec;
-  int i, j;
-  uint32 sector, sect;
-  uint8 volname_len;
-
   if (!volumename[0]) {                       // if we already did the work don't bother.
+    //fprintf(out, "Searching for MDDF block.\n");
     for (sector = 0; sector < F->numblocks; sector++) {
       sect = sorttag[sector];
     
@@ -2061,7 +2048,7 @@ void cli(DC42ImageType *F) {
               printf("DANGER! unexpected sector #%d wanted %d\n", sector_number, last_sector);
             }
 
-            offset =- 4;
+            offset = -4;
             last_sector = sector_number;
           }
 
