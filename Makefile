@@ -2,21 +2,21 @@
 # that require ./configure && make.  You really
 # should use the build.sh script directly.
 
-all:    src/host/wxui/lisaem_wx.cpp
-        pwd
-        /bin/ls -l
+all:	src/host/wxui/lisaem_wx.cpp
+		pwd
+		/bin/ls -l
 	./build.sh build 
 
-build:   src/host/wxui/lisaem_wx.cpp
+build:	src/host/wxui/lisaem_wx.cpp
 	./build.sh build 
 
-clean:   src/host/wxui/lisaem_wx.cpp
+clean:	src/host/wxui/lisaem_wx.cpp
 	./build.sh clean
 
-install: src/host/wxui/lisaem_wx.cpp
+install:	src/host/wxui/lisaem_wx.cpp
 	./build.sh build install
 
-package: src/host/wxui/lisaem_wx.cpp
+package:	src/host/wxui/lisaem_wx.cpp
 	./build.sh build package
 me:
 	
@@ -26,7 +26,7 @@ sandwich: me a
 	[ `id -u` -ne 0 ] && echo "What? Make it yourself." || echo Okay
 
 love:
-	#    "Not war?"
+	#	"Not war?"
 
 war:
-	#    "Not love?"
+	#	"Not love?"
